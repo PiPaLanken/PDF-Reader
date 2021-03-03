@@ -8,6 +8,7 @@ namespace PDF_Reader
     class LoadFiles
     {
         static List<string> PDF_Files = new List<string>();
+        static List<string> WrongFiles = new List<string>();
         public static void GetFiles(string Path)
         {
             var directory = Directory.GetFiles(Path);
@@ -16,17 +17,24 @@ namespace PDF_Reader
                 PDF_Files.Add(file);
                 Console.WriteLine(file);
             }
-            CheckFileType(PDF_Files);
+            Console.WriteLine("\n");
+            PDF_Files = CheckFileType(PDF_Files);
+            foreach (string file in PDF_Files)
+            {
+                Console.WriteLine(file);
+            }
         }
 
-        private static List<string> CheckFileType(List<string> FileList)
+        private static List<string> CheckFileType(List<string> ListToCheck)
         {
-            foreach(string file in FileList)
+            List<string> updatedList = new List<string>();
+            foreach(string file in ListToCheck)
             {
-                if (!file.EndsWith(".pdf"))
-                    FileList.Remove(file);
+                if (file.EndsWith(".pdf"))
+                    updatedList.Add(file);
+                else WrongFiles.Add(file);
             }
-            return FileList;
+            return updatedList;
         }
     }
 }
