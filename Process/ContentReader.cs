@@ -25,18 +25,11 @@ namespace PDF_Reader
             PdfDocument document = PdfDocument.Open(@file);
             foreach (Page page in document.GetPages())
             {
-                foreach (Word word in page.GetWords())
-                {
-                   
-                    Console.WriteLine(word.Text);
-                }
-            }
-        }
-        private void Sort(string text)
-        {
-            if (text.Contains("Kauf"))
-            {
-
+                if (page.Text.Contains("Kauf"))
+                    Kauf.Add(file);
+                else if (page.Text.Contains("Verkauf"))
+                    Verkauf.Add(file);
+                else break;
             }
         }
     }
