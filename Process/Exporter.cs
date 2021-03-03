@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PDF_Reader
+namespace PDF_Reader.Process
 {
-    class ReadContent
+    class Exporter
     {
-        
-
     }
 }

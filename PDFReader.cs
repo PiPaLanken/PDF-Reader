@@ -6,10 +6,12 @@ namespace PDF_Reader
     {
         const bool TestMode = true;
         static string Path = "";
+        static string DestinationPath = "";
 
-        public PDFReader(string ImportPath)
+        public PDFReader(string ImportPath, string ExportPath)
         {
             Path = ImportPath;
+            DestinationPath = ExportPath;
             Start();
         }
 
@@ -22,7 +24,7 @@ namespace PDF_Reader
 
         private static void Start()
         {
-            LoadFiles.GetFiles(Path);
+            FileLoader.GetFiles(Path);
             //Manager manager = new Manager(Path);
         }
         

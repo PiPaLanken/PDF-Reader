@@ -5,7 +5,7 @@ using System.IO;
 
 namespace PDF_Reader
 {
-    class LoadFiles
+    class FileLoader
     {
         static List<string> PDF_Files = new List<string>();
         static List<string> WrongFiles = new List<string>();
@@ -23,6 +23,7 @@ namespace PDF_Reader
             {
                 Console.WriteLine(file);
             }
+            ContentReader readContent = new ContentReader(PDF_Files);
         }
 
         private static List<string> CheckFileType(List<string> ListToCheck)
