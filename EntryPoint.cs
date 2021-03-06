@@ -8,34 +8,32 @@ namespace PDF_Reader
     public class EntryPoint
     {
         const bool TESTMODE = true;
-        static string Path = null;
-        static string DestinationPath = null;
-
         public EntryPoint()
         {
         }
 
         static void Main(string[] args)
         {
+            string path, destPath, customExpertName;
             if (TESTMODE)
-                Path = @"C:\Users\mayer\Pictures\Uplay\";
+            {
+                path = @"C:\Users\mayer\Pictures\Uplay\";
+                destPath = @"C:\Users\mayer\Pictures\Uplay\Export\";
+                customExpertName = "NiceFile";
+            }
             
-            List<string> pdfFiles = FileLoader.GetPDFFiles(Path);
+            Start(path, destPath, customExpertName);
+
+        }
+
+        public static void Start(string importPath, string exportPath, string customExportName)
+        {
+            List<string> pdfFiles = FileLoader.GetPDFFiles(importPath);
             List<string> filterTypes = new List<string>() { "Kauf", "Verkauf" };
             Dictionary<string, List<string>> filteredPDFFiles = ContentReader.FilterBy(pdfFiles, filterTypes);
             List<Document> documents = ContentReader.GetDocumentsOutOfTypePaths(filteredPDFFiles);
+            string excelPath = ExcelManager.CreateFile(exportPath, customExportName);
 
         }
-
-        public static void Start(string importPath, string exportPath)
-        {
-            Path = importPath;
-            DestinationPath = exportPath;
-            List<string> pdfFiles = FileLoader.GetPDFFiles(Path);
-            List<string> filterTypes = new List<string>() { "Kauf", "Verkauf" };
-            Dictionary<string, List<string>> filteredPDFFiles = ContentReader.FilterBy(pdfFiles, filterTypes);
-        }
-        
-
     }
 }

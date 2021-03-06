@@ -8,7 +8,7 @@ namespace PDF_Reader.Classes
     {
         public PurchaseDoc(string date, string name, float shares, float shareprice, float provision, float finalAmount) : base(date, name, shares, shareprice, provision, finalAmount)
         {
-
+            
         }
     }
 }

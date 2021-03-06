@@ -18,34 +18,29 @@ namespace PDF_Reader.Process
             List<string> Files = new List<string>();
             Files = pdf_Files;
             foreach (string type in types)
-            {
                 result.Add(type, new List<string>());
-            }
             foreach (string file in Files)
             {
                 PdfDocument document = PdfDocument.Open(@file);
                 foreach (Page page in document.GetPages())
-                {
                     foreach (string type in types)
-                    {
                         if (page.Text.Contains(type))
                             result[type].Add(file);
-                    }
-                }
             }
             return result;
         }
         public static List<Document> GetDocumentsOutOfTypePaths(Dictionary<string, List<string>> typePaths)
         {
+            List<Document> documents = new List<Document>();
             foreach (string path in typePaths["Kauf"])
             {
-                GetBasicInformationOutOfPath(path);
+                documents.Add(GetBasicInformationOutOfPath(path));
             }
             foreach (string path in typePaths["Verkauf"])
             {
-                GetSellInformationOutOfPath(path);
+                documents.Add(GetSellInformationOutOfPath(path));
             }
-            return null;
+            return documents;
         } 
         public static Document GetBasicInformationOutOfPath(string path)
         {
@@ -81,12 +76,8 @@ namespace PDF_Reader.Process
         {
             List<string> result = new List<string>();
             foreach (Page page in pdfDocument.GetPages())
-            {
                 foreach (Word word in page.GetWords())
-                {
                     result.Add(Convert.ToString(word));
-                }
-            }
             return result;
         }
 
@@ -106,14 +97,10 @@ namespace PDF_Reader.Process
                     nameBlocks.Add(wordsInDocument[number]);
                 }
                 foreach (string name in nameBlocks)
-                {
                     result += name + " ";
-                }
             }
             else if (!CheckIfTaxesAreIncluded(wordsInDocument))
-            {
                 return "0";
-            }
             return result;
         }
 
@@ -121,12 +108,8 @@ namespace PDF_Reader.Process
         {
             List<string> Words = WordsInDocument;
             foreach (string word in Words)
-            {
                 if (word.Contains("Kapitalertragsteuer"))
-                {
                     return true;
-                }
-            }
             return false;
         }
 
