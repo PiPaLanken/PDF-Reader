@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using PDF_Reader.Classes;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace PDF_Reader.Process
 {
     class ExcelManager
     {
+        public static void WriteDataIntoExcel(List<Document> documents)
+        {
+            foreach (Document doc in documents)
+            {
+                if (doc.Name== "SellDoc")
+                {
 
-        /*Microsoft.Office.Interop.Excel.Workbook workBook;
-        Microsoft.Office.Interop.Excel.Worksheet workSheet;
-        Microsoft.Office.Interop.Excel.Range cellRange;*/
-
-       public static void WriteDataToExcel(string destinationPath)
-       {
-
-       }
+                }
+            }
+        }
 
         public static string CreateFile(string destinationPath, string customExportName)
         {
@@ -38,16 +40,25 @@ namespace PDF_Reader.Process
             try
             {
                 Excel.Application excel = new Excel.Application();
-                var excelWorkBook = excel.Workbooks.Add(Type.Missing);
+                Excel.Workbook excelWorkBook = excel.Workbooks.Add(Type.Missing);
                 if (excel == null)
                     throw new Exception("Excel is not properly installed!!");
+                CreateExcelLayout(excel, excelWorkBook);
                 excelWorkBook.SaveAs(exportPath);
-                return null;
+                excel.Quit();
+                return exportPath;
             }
             catch(Exception e)
             {
                 throw new Exception("Creation failed: "+e.Message);
             }
+        }
+        public static void CreateExcelLayout(Excel.Application excel, Excel.Workbook excelWorkBook)
+        {
+            System.Data.DataTable table = new System.Data.DataTable();
+            table.Columns.Add("Test", typeof(string));
+
+
         }
     }
 }
