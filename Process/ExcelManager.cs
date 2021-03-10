@@ -109,7 +109,10 @@ namespace PDF_Reader.Process
             table.Columns.Add("Anzahl", typeof(float));
             table.Columns.Add("Kurs", typeof(float));
             table.Columns.Add("Kurswert", typeof(float));
-
+            table.Columns.Add("Courtage", typeof(float));
+            table.Columns.Add("Handelsplatzgebühr", typeof(float));
+            if (isBuy)
+                table.Columns.Add("Handelsentgelt", typeof(float));
             if (!isBuy)
             {
                 table.Columns.Add("Kapitalsertragssteuer", typeof(float));
@@ -122,13 +125,17 @@ namespace PDF_Reader.Process
             
             foreach (Document doc in Documents)
             {
+                Console.WriteLine(doc);
                 if (doc.GetType() == typeof(SellDoc)&&!isBuy)
                 {
                     var sellDoc = (SellDoc)doc;
-                    table.Rows.Add(sellDoc.Date, sellDoc.Name, sellDoc.Shares, sellDoc.SharePrice, 0f, sellDoc.CapitalTax, sellDoc.ChurchTax, sellDoc.SolidTax, sellDoc.Provision, sellDoc.FinalAmount);
+                    table.Rows.Add(sellDoc.Date, sellDoc.Name, sellDoc.Shares, sellDoc.SharePrice, 0f,sellDoc.Courtage,sellDoc.TradingPlaceFee, sellDoc.CapitalTax, sellDoc.ChurchTax, sellDoc.SolidTax, sellDoc.Provision, sellDoc.FinalAmount);
                 }
-                if (doc.GetType() == typeof(PurchaseDoc)&&isBuy)
-                    table.Rows.Add(doc.Date, doc.Name, doc.Shares, doc.SharePrice, 0f, doc.Provision, doc.FinalAmount);
+                if (doc.GetType() == typeof(PurchaseDoc) && isBuy)
+                {
+                    var purchDoc = (PurchaseDoc)doc;
+                    table.Rows.Add(purchDoc.Date, purchDoc.Name, purchDoc.Shares, purchDoc.SharePrice, purchDoc.Courtage, purchDoc.TradingPlaceFee, purchDoc.TradingFee, 0f, purchDoc.Provision, purchDoc.FinalAmount);
+                }
             }
             return table;
         }
