@@ -42,7 +42,7 @@ namespace PDF_Reader.Process
             }
             return documents;
         } 
-        public static Document GetBasicInformationOutOfPath(string path)
+        public static PurchaseDoc GetBasicInformationOutOfPath(string path)
         {
             string date = GetValueOutOfPDFBetween("Datum:", "Sven", path,0);
             string name = GetValueOutOfPDFBetween("Wertpapierbezeichnung","Nominale", path,0);
@@ -51,7 +51,7 @@ namespace PDF_Reader.Process
             float provision = StringToFloat(GetValueOutOfPDFBetween("Provision", "Endbetrag", path, 0));
             float finalAmount = StringToFloat(GetValueOutOfPDFBetween("Endbetrag", "Abrechnungs-IBAN", path, 0));
 
-            return new Document(date,name,shares,sharePrice,provision,finalAmount);
+            return new PurchaseDoc(date,name,shares,sharePrice,provision,finalAmount);
         }
 
         public static SellDoc GetSellInformationOutOfPath(string path)

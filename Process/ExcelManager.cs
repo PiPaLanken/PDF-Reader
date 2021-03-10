@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using PDF_Reader.Classes;
-using Excel = Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Excel;
+using OfficeOpenXml;
+
+
 
 namespace PDF_Reader.Process
 {
     class ExcelManager
     {
-        public static void WriteDataIntoExcel(List<Document> documents)
-        {
-            foreach (Document doc in documents)
-            {
-                if (doc.Name== "SellDoc")
-                {
+        private static List<Document> Documents;
+        private static bool isBuy = true;
 
-                }
-            }
+        public ExcelManager()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
-        public static string CreateFile(string destinationPath, string customExportName)
+        public static string CreateFilePath(string destinationPath, string customExportName)
         {
             string exportFileType = ".xlsx";
             string exportPathWithCustomName = destinationPath + customExportName;
@@ -31,24 +31,77 @@ namespace PDF_Reader.Process
                     n++;
                 exportPathWithCustomName +="_"+ n;
             }
-            CreateExcelFile(exportPathWithCustomName + exportFileType);
             return exportPathWithCustomName + exportFileType;
         }
 
-        public static string CreateExcelFile(string exportPath)
+        public static string CreateExcelFileWithData(string exportPath, List<Document> documents)
         {
-            try
-            {
-                Excel.Application excel = new Excel.Application();
-                CreateExcelLayout(excel,exportPath).Quit();
-                return exportPath;
-            }
-            catch(Exception e)
-            {
-                throw new Exception("Creation failed: "+e.Message);
-            }
+            Documents = documents;
+            ManageExcelCreate(exportPath);
+            return exportPath;
         }
-        public static System.Data.DataTable SetTableValues()
+        public static void ManageExcelCreate(string exportPath)
+        {
+            using (var package = new ExcelPackage())
+            {
+                CreateExcelBuyLayout(exportPath,package);
+                isBuy = false;
+                CreateExcelSellLayout(exportPath, package);
+                FileInfo file = new FileInfo(exportPath);
+                package.SaveAs(file);
+            }
+                
+        }
+
+        public static bool CreateExcelBuyLayout(string exportPath, ExcelPackage package)
+        {
+            var worksheet = package.Workbook.Worksheets.Add("Buying");
+            worksheet.Name = "Kauf";
+            worksheet.Cells[1, 1].Value = "Aktien - Käufe";
+            worksheet.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            worksheet.Cells[1, 1, 1, 8].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Dashed);
+            worksheet.Cells[1, 1].Style.Font.Bold = true;
+            worksheet.Cells[1, 1, 1, 8].Merge = true;
+            int rowCount = 2;
+
+            foreach (System.Data.DataRow dataRow in CreateTableLayout().Rows)
+            {
+                rowCount += 1;
+                for (int i =1; i<= CreateTableLayout().Columns.Count; i++)
+                {
+                    if (rowCount == 3)
+                        worksheet.Cells[2, i].Value = CreateTableLayout().Columns[i - 1].ColumnName;
+                    worksheet.Cells[rowCount, i].Value = dataRow[i - 1].ToString();
+                }
+            }
+            return true;
+        }
+        public static bool CreateExcelSellLayout(string exportPath, ExcelPackage package)
+        {
+            var worksheet = package.Workbook.Worksheets.Add("Selling");
+            worksheet.Name = "Verkauf";
+            worksheet.Cells[1, 1].Value = "Aktien - Verkäufe";
+            worksheet.Cells[1, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+            worksheet.Cells[1, 1, 1, 11].Style.Border.BorderAround(OfficeOpenXml.Style.ExcelBorderStyle.Dashed);
+            worksheet.Cells[1, 1].Style.Font.Bold = true;
+            worksheet.Cells[1, 1, 1, 11].Merge = true;
+
+            int rowCount = 2;
+            foreach (System.Data.DataRow dataRow in CreateTableLayout().Rows)
+            {
+                rowCount += 1;
+                for (int i = 1; i <= CreateTableLayout().Columns.Count; i++)
+                {
+                    if (rowCount == 3)
+                        worksheet.Cells[2, i].Value = CreateTableLayout().Columns[i - 1].ColumnName;
+                    worksheet.Cells[rowCount, i].Value = dataRow[i - 1].ToString();
+                }
+            }
+
+            return true;
+        }
+
+        public static System.Data.DataTable CreateTableLayout()
         {
             System.Data.DataTable table = new System.Data.DataTable();
             table.Columns.Add("Datum", typeof(DateTime));
@@ -56,65 +109,26 @@ namespace PDF_Reader.Process
             table.Columns.Add("Anzahl", typeof(float));
             table.Columns.Add("Kurs", typeof(float));
             table.Columns.Add("Kurswert", typeof(float));
-            //if (verkauf)
-            //table.Columns.Add("Kapitalsertragssteuer", typeof(float));
-            //table.Columns.Add("Kirchensteuer", typeof(float));
-            //table.Columns.Add("Solidaritätssteuer", typeof(float));
+
+            if (!isBuy)
+            {
+                table.Columns.Add("Kapitalsertragssteuer", typeof(float));
+                table.Columns.Add("Kirchensteuer", typeof(float));
+                table.Columns.Add("Solidaritätssteuer", typeof(float));
+            }
+
             table.Columns.Add("Provision", typeof(float));
             table.Columns.Add("Endbetrag", typeof(float));
 
-            return table;
-        }
-        public static Excel.Application CreateExcelLayout(Excel.Application excel, string exportPath)
-        {
-            Microsoft.Office.Interop.Excel.Range cellRange;
-            Excel.Workbook excelWorkBook = excel.Workbooks.Add(Type.Missing);
-            Excel.Worksheet worksheet = (Excel.Worksheet)excel.ActiveSheet;
-            worksheet.Name = "Kauf";
-            //worksheet.Name = "Verkauf";
-            worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 7]].Merge();
-            worksheet.Cells[1, 1] = "Aktien - Käufe";
-            //worksheet.Cells[1, 1] = "Aktien - Verkauf";
-            worksheet.Cells.Font.Size = 15;
-
-            int rowcount = 2;
-
-            foreach (System.Data.DataRow dataRow in SetTableValues().Rows)
+            foreach (Document doc in Documents) //PurchaseDoc
             {
-                rowcount += 1;
-                for (int i=1; i<=SetTableValues().Columns.Count; i++)
-                {
-                    if (rowcount == 3)
-                    {
-                        worksheet.Cells[2, i] = SetTableValues().Columns[i - i].ColumnName;
-                        worksheet.Cells.Font.Color = System.Drawing.Color.Black;
-                    }
-                    worksheet.Cells[rowcount, i] = dataRow[i - 1].ToString();
-                    if (rowcount > 3)
-                    {
-                        if (i== SetTableValues().Columns.Count) 
-                        { 
-                            if (rowcount %2 == 0)
-                            {
-                                cellRange = worksheet.Range[worksheet.Cells[rowcount, 1], worksheet.Cells[rowcount, SetTableValues().Columns.Count]];
-                            }
-                        }
-                    }
-                }
+                 table.Rows.Add(doc.Date, doc.Name, doc.Shares, doc.SharePrice, 0f, doc.Provision, doc.FinalAmount);
             }
-            cellRange = worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[rowcount, SetTableValues().Columns.Count]];
-            cellRange.EntireColumn.AutoFit();
-            Microsoft.Office.Interop.Excel.Borders border = cellRange.Borders;
-            border.LineStyle = Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
-            border.Weight = 2d;
-
-            cellRange = worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[2, SetTableValues().Columns.Count]];
-
-            excelWorkBook.SaveAs(exportPath);
-            excelWorkBook.Close();
-            return excel;
-
-            //fehlt nur workbook closed und return excel;
+            foreach(SellDoc sellDoc in Documents)
+            {
+                table.Rows.Add(sellDoc.Date, sellDoc.Name, sellDoc.Shares, sellDoc.SharePrice, 0f, sellDoc.CapitalTax, sellDoc.ChurchTax, sellDoc.SolidTax, sellDoc.Provision, sellDoc.FinalAmount);
+            }
+            return table;
         }
     }
 }

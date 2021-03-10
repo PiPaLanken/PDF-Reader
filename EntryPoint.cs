@@ -28,13 +28,13 @@ namespace PDF_Reader
 
         public static string Start(string importPath, string exportPath, string customExportName)
         {
-            //List<string> pdfFiles = FileLoader.GetPDFFiles(importPath);
-            //List<string> filterTypes = new List<string>() { "Kauf", "Verkauf" };
-           // Dictionary<string, List<string>> filteredPDFFiles = ContentReader.FilterBy(pdfFiles, filterTypes);
-            //List<Document> documents = ContentReader.GetDocumentsOutOfTypePaths(filteredPDFFiles);
-            string excelPath = ExcelManager.CreateFile(exportPath, customExportName);
-            //ExcelManager.WriteDataIntoExcel(documents);
-            
+            List<string> pdfFiles = FileLoader.GetPDFFiles(importPath);
+            List<string> filterTypes = new List<string>() { "Kauf", "Verkauf" };
+            Dictionary<string, List<string>> filteredPDFFiles = ContentReader.FilterBy(pdfFiles, filterTypes);
+            List<Document> documents = ContentReader.GetDocumentsOutOfTypePaths(filteredPDFFiles);
+            string excelPath = ExcelManager.CreateFilePath(exportPath, customExportName);
+            ExcelManager.CreateExcelFileWithData(excelPath, documents);
+
 
             return excelPath;
         }
