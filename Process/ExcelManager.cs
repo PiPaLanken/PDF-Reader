@@ -119,14 +119,16 @@ namespace PDF_Reader.Process
 
             table.Columns.Add("Provision", typeof(float));
             table.Columns.Add("Endbetrag", typeof(float));
-
-            foreach (Document doc in Documents) //PurchaseDoc
+            
+            foreach (Document doc in Documents)
             {
-                 table.Rows.Add(doc.Date, doc.Name, doc.Shares, doc.SharePrice, 0f, doc.Provision, doc.FinalAmount);
-            }
-            foreach(SellDoc sellDoc in Documents)
-            {
-                table.Rows.Add(sellDoc.Date, sellDoc.Name, sellDoc.Shares, sellDoc.SharePrice, 0f, sellDoc.CapitalTax, sellDoc.ChurchTax, sellDoc.SolidTax, sellDoc.Provision, sellDoc.FinalAmount);
+                if (doc.GetType() == typeof(SellDoc)&&!isBuy)
+                {
+                    var sellDoc = (SellDoc)doc;
+                    table.Rows.Add(sellDoc.Date, sellDoc.Name, sellDoc.Shares, sellDoc.SharePrice, 0f, sellDoc.CapitalTax, sellDoc.ChurchTax, sellDoc.SolidTax, sellDoc.Provision, sellDoc.FinalAmount);
+                }
+                if (doc.GetType() == typeof(PurchaseDoc)&&isBuy)
+                    table.Rows.Add(doc.Date, doc.Name, doc.Shares, doc.SharePrice, 0f, doc.Provision, doc.FinalAmount);
             }
             return table;
         }
